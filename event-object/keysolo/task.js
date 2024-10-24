@@ -5,26 +5,41 @@ class Game {
     this.winsElement = container.querySelector('.status__wins');
     this.lossElement = container.querySelector('.status__loss');
 
-    this.reset();
-
     this.registerEvents();
+
+    this.addTimer();
+
+    this.reset();
+  }
+
+  addTimer() {
+    const timerParag = document.createElement('p');
+    timerParag.innerHTML = 'Осталось времени: ';
+
+    this.countDownTime = document.createElement('span');
+    this.countDownTime.className = 'status__timer'; 
+    
+    timerParag.append(this.countDownTime);
+    this.lossElement.parentElement.insertAdjacentElement('afterend', timerParag);
   }
 
   reset() {
     this.setNewWord();
     this.winsElement.textContent = 0;
-    this.lossElement.textContent = 0;
+    this.lossElement.textContent = 0;  
   }
 
   registerEvents() {
-    /*
-      TODO:
-      Написать обработчик события, который откликается
-      на каждый введённый символ.
-      В случае правильного ввода символа вызываем this.success()
-      При неправильном вводе символа - this.fail();
-      DOM-элемент текущего символа находится в свойстве this.currentSymbol.
-     */
+    document.addEventListener('keydown', (event) => {
+      const tappedKey = event.key.toLowerCase();
+      const curSymLowCased = this.currentSymbol.textContent.toLowerCase();
+      if(tappedKey.charCodeAt() === curSymLowCased.charCodeAt()) {
+        this.success();
+        this.startTimer();
+      } else {
+        this.fail()
+        };
+    });
   }
 
   success() {
@@ -54,14 +69,17 @@ class Game {
 
   setNewWord() {
     const word = this.getWord();
-
+    
     this.renderWord(word);
+    
+    this.countDownTime.textContent = word.length;
+    this.startTimer(); 
   }
 
   getWord() {
     const words = [
-        'bob',
-        'awesome',
+        'bob боб',
+        'awesome круто',
         'netology',
         'hello',
         'kitty',
@@ -70,10 +88,15 @@ class Game {
         'popcorn',
         'cinema',
         'love',
-        'javascript'
+        'javascript',
+        'я люблю kitkat',
+        'i love кит-кат',
+        'english lesson',
+        'русский язык',
+        'символы кириллицы'
       ],
       index = Math.floor(Math.random() * words.length);
-
+  
     return words[index];
   }
 
@@ -87,6 +110,23 @@ class Game {
     this.wordElement.innerHTML = html;
 
     this.currentSymbol = this.wordElement.querySelector('.symbol_current');
+  }
+
+  startTimer() {
+    if (this.intervalId) { 
+      clearInterval(this.intervalId);
+    };
+    
+    this.intervalId = setInterval(() => {
+        let timerCount = Number(this.countDownTime.textContent);
+        if(timerCount <= 0) {
+          clearInterval(this.intervalId);
+          alert('Вы проиграли!');
+          this.reset(); 
+        } else {
+          this.countDownTime.textContent = --timerCount;
+        } 
+    }, 1000);
   }
 }
 
